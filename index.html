@@ -3,248 +3,426 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="theme-color" content="#111827" />
+<meta name="theme-color" content="#0a0e0a" />
 <title>My PPL Routine</title>
 <style>
-  /* ---------- Theme: simple, light, clean ---------- */
   :root {
-    --bg: #f5f6f8;
-    --card: #ffffff;
-    --ink: #1f2430;
-    --muted: #6b7280;
-    --line: #e6e8ec;
-    --accent: #2563eb;
-    --accent-soft: #eef2ff;
-    --radius: 14px;
-    --shadow: 0 1px 2px rgba(16,24,40,.06), 0 8px 24px rgba(16,24,40,.05);
+    --bg: #07090a;
+    --bg2: #0c100e;
+    --card: #11161300;
+    --card-solid: #121814;
+    --line: #1e2a22;
+    --ink: #e7f5ec;
+    --muted: #7f9a89;
+    --green: #4ade80;
+    --green-bright: #86efac;
+    --green-dim: #1f3a2a;
+    --radius: 16px;
+    --glow: 0 0 0 1px rgba(74,222,128,.15), 0 8px 30px rgba(74,222,128,.06);
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: var(--bg);
+    background:
+      radial-gradient(1200px 600px at 50% -10%, rgba(74,222,128,.08), transparent 60%),
+      var(--bg);
     color: var(--ink);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
   }
 
-  /* ---------- Lock screen ---------- */
-  #lock {
-    position: fixed; inset: 0;
-    background: var(--bg);
-    display: flex; align-items: center; justify-content: center;
-    padding: 24px; z-index: 50;
-  }
-  .lock-card {
-    width: 100%; max-width: 360px;
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 28px 24px;
-    text-align: center;
-  }
-  .lock-emoji { font-size: 34px; }
-  .lock-card h1 { font-size: 20px; margin: 12px 0 4px; }
-  .lock-card p { color: var(--muted); font-size: 14px; margin: 0 0 20px; }
-  .field { text-align: left; margin-bottom: 14px; }
-  input[type="password"] {
-    width: 100%; padding: 13px 14px;
-    border: 1px solid var(--line); border-radius: 10px;
-    font-size: 16px; outline: none; background: #fafbfc;
-  }
-  input[type="password"]:focus { border-color: var(--accent); background: #fff; }
-  .remember {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 14px; color: var(--muted);
-    margin: 4px 2px 18px; cursor: pointer; user-select: none;
-  }
-  .remember input { width: 16px; height: 16px; accent-color: var(--accent); }
-  button.primary {
-    width: 100%; padding: 13px; border: none; border-radius: 10px;
-    background: var(--accent); color: #fff; font-size: 16px; font-weight: 600;
-    cursor: pointer;
-  }
-  button.primary:active { transform: translateY(1px); }
-  .error { color: #dc2626; font-size: 13px; min-height: 18px; margin-top: 12px; }
+  #app { max-width: 780px; margin: 0 auto; padding: 20px 16px 70px; }
 
-  /* ---------- App ---------- */
-  #app { max-width: 760px; margin: 0 auto; padding: 18px 16px 60px; }
-  .topbar {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 6px;
+  .topbar { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .topbar h1 {
+    font-size: 24px; margin: 0; letter-spacing: -.4px;
+    background: linear-gradient(90deg, var(--green-bright), var(--green));
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
   }
-  .topbar h1 { font-size: 22px; margin: 0; }
-  .logout {
-    background: none; border: 1px solid var(--line); color: var(--muted);
-    padding: 7px 12px; border-radius: 9px; font-size: 13px; cursor: pointer;
+  .status {
+    font-size: 11px; color: var(--muted); border: 1px solid var(--line);
+    padding: 4px 9px; border-radius: 999px; white-space: nowrap; display:flex; align-items:center; gap:6px;
   }
-  .sub { color: var(--muted); font-size: 14px; margin: 0 0 18px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+  .status.cloud .dot { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .status.local .dot { background: #facc15; }
+  .sub { color: var(--muted); font-size: 13px; margin: 4px 0 18px; }
 
-  /* Day selector */
-  .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+  /* ---------- Stats ---------- */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 22px; }
+  .stat {
+    background: linear-gradient(180deg, rgba(74,222,128,.06), rgba(74,222,128,0));
+    border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 14px 10px; text-align: center;
+  }
+  .stat .num {
+    font-size: 26px; font-weight: 800; color: var(--green-bright); line-height: 1;
+    letter-spacing: -1px;
+  }
+  .stat .lbl { font-size: 10.5px; color: var(--muted); margin-top: 6px; text-transform: uppercase; letter-spacing: .04em; }
+  @media (max-width: 460px) { .stats { grid-template-columns: repeat(2, 1fr); } .stat .num { font-size: 24px; } }
+
+  /* ---------- Tabs ---------- */
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
   .tab {
-    border: 1px solid var(--line); background: var(--card);
-    padding: 9px 14px; border-radius: 999px; font-size: 14px; cursor: pointer;
-    color: var(--ink); font-weight: 500;
+    border: 1px solid var(--line); background: var(--bg2);
+    padding: 9px 15px; border-radius: 999px; font-size: 14px; cursor: pointer;
+    color: var(--muted); font-weight: 600; transition: .15s;
   }
-  .tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .tab.active { background: var(--green); border-color: var(--green); color: #062611; box-shadow: 0 0 18px rgba(74,222,128,.35); }
 
+  /* ---------- Day card ---------- */
   .day-card {
-    background: var(--card); border: 1px solid var(--line);
-    border-radius: var(--radius); box-shadow: var(--shadow);
-    padding: 18px 16px; margin-bottom: 18px;
+    background: var(--card-solid); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 18px 16px 16px; margin-bottom: 18px; box-shadow: var(--glow);
   }
-  .day-card h2 { font-size: 18px; margin: 0 0 2px; }
-  .day-card .focus { color: var(--accent); font-size: 13px; font-weight: 600; margin: 0 0 14px; }
+  .day-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .day-head h2 { font-size: 19px; margin: 0; }
+  .focus { color: var(--green); font-size: 12px; font-weight: 700; margin: 0 0 14px; text-transform: uppercase; letter-spacing: .05em; }
 
-  table { width: 100%; border-collapse: collapse; }
-  th, td { text-align: left; padding: 10px 8px; font-size: 14px; vertical-align: top; }
-  th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .03em; border-bottom: 1px solid var(--line); }
-  td { border-bottom: 1px solid var(--line); }
-  tr:last-child td { border-bottom: none; }
-  .ex { font-weight: 600; }
-  .muscle { color: var(--muted); font-size: 12px; }
-  .sets { white-space: nowrap; }
-  .wt { color: var(--muted); white-space: nowrap; }
+  .progress-wrap { display:flex; align-items:center; gap:10px; margin-bottom: 16px; }
+  .progress { flex: 1; height: 9px; background: var(--green-dim); border-radius: 999px; overflow: hidden; }
+  .progress > i { display:block; height:100%; width:0; background: linear-gradient(90deg,var(--green),var(--green-bright)); border-radius:999px; transition: width .25s; }
+  .progress-txt { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 34px; text-align:right; }
 
-  .notes {
-    background: var(--accent-soft); border: 1px solid #dbe4ff;
-    border-radius: var(--radius); padding: 16px; font-size: 14px;
+  /* exercise rows */
+  .ex-row {
+    display: flex; align-items: center; gap: 13px; padding: 12px 6px;
+    border-bottom: 1px solid var(--line); cursor: pointer; user-select: none;
   }
-  .notes h3 { margin: 0 0 8px; font-size: 15px; }
-  .notes ul { margin: 0; padding-left: 18px; }
-  .notes li { margin-bottom: 7px; }
-
-  @media (max-width: 480px) {
-    .wt { display: none; } /* keep table tidy on small phones */
-    th.wt-h { display: none; }
+  .ex-row:last-of-type { border-bottom: none; }
+  .check {
+    width: 24px; height: 24px; border-radius: 7px; border: 2px solid var(--line);
+    flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
+    transition: .15s; background: var(--bg2);
   }
+  .check svg { width: 14px; height: 14px; opacity: 0; transform: scale(.5); transition: .15s; }
+  .ex-row.done .check { background: var(--green); border-color: var(--green); box-shadow: 0 0 14px rgba(74,222,128,.5); }
+  .ex-row.done .check svg { opacity: 1; transform: scale(1); }
+  .ex-info { flex: 1; min-width: 0; }
+  .ex-name { font-weight: 600; font-size: 15px; }
+  .ex-row.done .ex-name { color: var(--muted); text-decoration: line-through; }
+  .ex-meta { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .ex-meta b { color: var(--green); font-weight: 600; }
+
+  .finish {
+    width: 100%; margin-top: 16px; padding: 14px; border: none; border-radius: 12px;
+    background: var(--green); color: #062611; font-size: 16px; font-weight: 800; cursor: pointer;
+    box-shadow: 0 0 22px rgba(74,222,128,.3); transition: .15s; letter-spacing: .2px;
+  }
+  .finish:active { transform: translateY(1px); }
+  .finish:disabled { background: var(--green-dim); color: var(--muted); box-shadow: none; cursor: not-allowed; }
+
+  /* ---------- History ---------- */
+  .section-title { font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin: 26px 0 12px; }
+  .hist-empty { color: var(--muted); font-size: 14px; padding: 18px; text-align: center; border: 1px dashed var(--line); border-radius: var(--radius); }
+  .hist-item {
+    display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 8px;
+    background: var(--card-solid); border: 1px solid var(--line); border-radius: 12px;
+  }
+  .hist-badge {
+    width: 42px; height: 42px; border-radius: 10px; flex: 0 0 auto;
+    background: linear-gradient(180deg, var(--green-dim), transparent);
+    border: 1px solid var(--line); display:flex; align-items:center; justify-content:center;
+    font-weight: 800; color: var(--green-bright); font-size: 13px;
+  }
+  .hist-main { flex: 1; min-width: 0; }
+  .hist-day { font-weight: 600; font-size: 15px; }
+  .hist-sub { font-size: 12px; color: var(--muted); }
+  .hist-del { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; padding: 4px 8px; border-radius: 8px; }
+  .hist-del:hover { color: #f87171; }
+
+  /* notes */
+  .notes { background: linear-gradient(180deg, rgba(74,222,128,.05), transparent); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; font-size: 13.5px; margin-top: 24px; color: var(--ink); }
+  .notes h3 { margin: 0 0 8px; font-size: 14px; color: var(--green); }
+  .notes ul { margin: 0; padding-left: 18px; color: var(--muted); }
+  .notes li { margin-bottom: 6px; }
+  .notes b { color: var(--ink); }
+
+  /* toast */
+  #toast {
+    position: fixed; left: 50%; bottom: 26px; transform: translate(-50%, 30px);
+    background: var(--green); color: #062611; font-weight: 700; font-size: 14px;
+    padding: 12px 20px; border-radius: 999px; box-shadow: 0 8px 30px rgba(74,222,128,.4);
+    opacity: 0; transition: .25s; pointer-events: none; z-index: 99;
+  }
+  #toast.show { opacity: 1; transform: translate(-50%, 0); }
 </style>
 </head>
 <body>
-
-<!-- ================= APP ================= -->
 <div id="app">
   <div class="topbar">
     <h1>My PPL Routine</h1>
+    <div class="status" id="status"><span class="dot"></span><span id="statusTxt">connecting…</span></div>
   </div>
-  <p class="sub">5-day Push / Pull / Legs · 80 kg lifter · no barbell/dumbbell rows</p>
+  <p class="sub">5-day Push / Pull / Legs · 80 kg lifter · tap an exercise to check it off</p>
 
+  <div class="stats" id="stats"></div>
   <div class="tabs" id="tabs"></div>
   <div id="content"></div>
 
+  <div class="section-title">Workout history</div>
+  <div id="history"></div>
+
   <div class="notes">
-    <h3>The things that make it work</h3>
+    <h3>Make it work</h3>
     <ul>
-      <li><strong>Warm up</strong> before the first heavy lift: 2–3 ramp-up sets (e.g. empty bar → 40 → 55 → working weight).</li>
-      <li><strong>Progressive overload</strong> is the whole game. Each week add a little weight or 1 more rep. Hit the top of the rep range on all sets → bump the weight next session.</li>
-      <li><strong>Rest:</strong> 2–3 min on heavy compounds (bench, squat, OHP, pulldown), 60–90 sec on the smaller stuff.</li>
-      <li><strong>Recovery:</strong> ~130–160 g protein/day (1.6–2 g/kg) and 7+ hours sleep.</li>
-      <li>Weights are starting estimates — if the last 1–2 reps aren't genuinely hard, go up; if you can't hit the low rep with clean form, go down.</li>
+      <li><b>Warm up</b> before the first heavy lift: 2–3 ramp-up sets.</li>
+      <li><b>Progressive overload</b> — each week add a little weight or 1 more rep. Top of the rep range on all sets → bump the weight.</li>
+      <li><b>Rest:</b> 2–3 min on heavy compounds, 60–90 sec on the small stuff.</li>
+      <li><b>Recovery:</b> ~130–160 g protein/day and 7+ hours sleep.</li>
     </ul>
   </div>
 </div>
 
-<script>
-/* =========================================================
-   ROUTINE DATA
-   ========================================================= */
+<div id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, collection, addDoc, deleteDoc, doc,
+  query, orderBy, onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* ---- Firebase web config (public by design; secured via Firestore rules) ---- */
+const firebaseConfig = {
+  apiKey: "AIzaSyBKMmun0yHsrN1nA0qMMTI1aen4hcCX5jk",
+  authDomain: "gessie-3b957.firebaseapp.com",
+  projectId: "gessie-3b957",
+  storageBucket: "gessie-3b957.firebasestorage.app",
+  messagingSenderId: "823541192654",
+  appId: "1:823541192654:web:9f5970f5de0b2c9336fd9f"
+};
+
+/* ============== ROUTINE DATA ============== */
 const DAYS = [
-  {
-    id: "pushA", name: "Push A", focus: "Chest focus",
-    rows: [
-      ["Flat bench press", "4 × 6–8", "60–70 kg", "Chest"],
-      ["Incline dumbbell press", "3 × 8–10", "22–28 kg ea", "Upper chest"],
-      ["Seated shoulder press (machine/DB)", "3 × 8–10", "18–24 kg ea", "Front delts"],
-      ["Cable / pec-deck fly", "3 × 12–15", "light–mod", "Chest"],
-      ["Lateral raise", "3 × 12–15", "8–12 kg ea", "Side delts"],
-      ["Triceps rope pushdown", "3 × 10–12", "25–35 kg", "Triceps"],
-    ],
-  },
-  {
-    id: "pullA", name: "Pull A", focus: "Width focus",
-    rows: [
-      ["Lat pulldown (wide grip)", "4 × 8–10", "50–65 kg", "Lats"],
-      ["Seated cable row", "3 × 8–10", "50–65 kg", "Mid back"],
-      ["Chest-supported machine row", "3 × 10–12", "moderate", "Mid/upper back"],
-      ["Face pulls", "3 × 15–20", "light–mod", "Rear delts"],
-      ["EZ-bar / barbell curl", "3 × 8–10", "25–30 kg", "Biceps"],
-      ["Hammer curl", "3 × 10–12", "12–16 kg ea", "Biceps/forearm"],
-    ],
-  },
-  {
-    id: "legs", name: "Legs", focus: "Full lower body + calves",
-    rows: [
-      ["Back squat (or hack squat)", "4 × 6–8", "80–100 kg", "Quads/glutes"],
-      ["Romanian deadlift", "3 × 8–10", "60–80 kg", "Hamstrings/glutes"],
-      ["Leg press", "3 × 10–12", "120–160 kg", "Quads/glutes"],
-      ["Leg curl (lying or seated)", "3 × 10–12", "moderate", "Hamstrings"],
-      ["Leg extension", "3 × 12–15", "moderate", "Quads"],
-      ["Standing calf raise", "4 × 12–15", "moderate", "Calves"],
-    ],
-  },
-  {
-    id: "pushB", name: "Push B", focus: "Shoulder focus",
-    rows: [
-      ["Standing overhead press", "4 × 6–8", "40–50 kg", "Shoulders"],
-      ["Incline bench press", "3 × 8–10", "50–60 kg", "Upper chest"],
-      ["Lateral raise", "4 × 12–15", "8–12 kg ea", "Side delts"],
-      ["Machine chest press", "3 × 10–12", "moderate", "Chest"],
-      ["Overhead triceps extension", "3 × 10–12", "12–16 kg", "Triceps"],
-      ["Triceps pushdown", "3 × 12–15", "20–30 kg", "Triceps"],
-    ],
-  },
-  {
-    id: "pullB", name: "Pull B", focus: "Thickness focus",
-    rows: [
-      ["Close-grip lat pulldown", "4 × 8–10", "50–65 kg", "Lats"],
-      ["Chest-supported machine row", "4 × 8–10", "mod–heavy", "Mid back"],
-      ["Straight-arm pulldown", "3 × 12–15", "light–mod", "Lats"],
-      ["Reverse pec-deck (rear delt)", "3 × 15–20", "light", "Rear delts"],
-      ["Incline dumbbell curl", "3 × 10–12", "8–12 kg ea", "Biceps"],
-      ["Cable curl", "3 × 12–15", "moderate", "Biceps"],
-    ],
-  },
+  { id:"pushA", name:"Push A", focus:"Chest focus", rows:[
+    ["Flat bench press","4 × 6–8","60–70 kg"],
+    ["Incline dumbbell press","3 × 8–10","22–28 kg ea"],
+    ["Seated shoulder press","3 × 8–10","18–24 kg ea"],
+    ["Cable / pec-deck fly","3 × 12–15","light–mod"],
+    ["Lateral raise","3 × 12–15","8–12 kg ea"],
+    ["Triceps rope pushdown","3 × 10–12","25–35 kg"],
+  ]},
+  { id:"pullA", name:"Pull A", focus:"Width focus", rows:[
+    ["Lat pulldown (wide grip)","4 × 8–10","50–65 kg"],
+    ["Seated cable row","3 × 8–10","50–65 kg"],
+    ["Chest-supported machine row","3 × 10–12","moderate"],
+    ["Face pulls","3 × 15–20","light–mod"],
+    ["EZ-bar curl","3 × 8–10","25–30 kg"],
+    ["Hammer curl","3 × 10–12","12–16 kg ea"],
+  ]},
+  { id:"legs", name:"Legs", focus:"Full lower body", rows:[
+    ["Back squat (or hack squat)","4 × 6–8","80–100 kg"],
+    ["Romanian deadlift","3 × 8–10","60–80 kg"],
+    ["Leg press","3 × 10–12","120–160 kg"],
+    ["Leg curl","3 × 10–12","moderate"],
+    ["Leg extension","3 × 12–15","moderate"],
+    ["Standing calf raise","4 × 12–15","moderate"],
+  ]},
+  { id:"pushB", name:"Push B", focus:"Shoulder focus", rows:[
+    ["Standing overhead press","4 × 6–8","40–50 kg"],
+    ["Incline bench press","3 × 8–10","50–60 kg"],
+    ["Lateral raise","4 × 12–15","8–12 kg ea"],
+    ["Machine chest press","3 × 10–12","moderate"],
+    ["Overhead triceps ext.","3 × 10–12","12–16 kg"],
+    ["Triceps pushdown","3 × 12–15","20–30 kg"],
+  ]},
+  { id:"pullB", name:"Pull B", focus:"Thickness focus", rows:[
+    ["Close-grip lat pulldown","4 × 8–10","50–65 kg"],
+    ["Chest-supported row","4 × 8–10","mod–heavy"],
+    ["Straight-arm pulldown","3 × 12–15","light–mod"],
+    ["Reverse pec-deck","3 × 15–20","light"],
+    ["Incline dumbbell curl","3 × 10–12","8–12 kg ea"],
+    ["Cable curl","3 × 12–15","moderate"],
+  ]},
 ];
 
+/* ============== STATE ============== */
+let sessions = [];                 // logged workouts
+let usingCloud = false;
+let db = null;
 let activeDay = 0;
+const LS_SESSIONS = "ppl_sessions";
+const LS_PROGRESS = "ppl_progress";
 
-function render() {
-  const tabs = document.getElementById("tabs");
-  tabs.innerHTML = DAYS.map((d, i) =>
-    `<button class="tab ${i === activeDay ? "active" : ""}" data-i="${i}">${d.name}</button>`
-  ).join("");
-  tabs.querySelectorAll(".tab").forEach(btn => {
-    btn.addEventListener("click", () => { activeDay = +btn.dataset.i; render(); });
-  });
+let progress = JSON.parse(localStorage.getItem(LS_PROGRESS) || "{}"); // {dayId:[bool,...]}
+function saveProgress(){ localStorage.setItem(LS_PROGRESS, JSON.stringify(progress)); }
+function dayProgress(id){
+  if(!progress[id]) progress[id] = DAYS.find(d=>d.id===id).rows.map(()=>false);
+  return progress[id];
+}
 
+/* ============== STORE (Firebase + local fallback) ============== */
+function setStatus(mode){
+  const el = document.getElementById("status");
+  el.className = "status " + mode;
+  document.getElementById("statusTxt").textContent =
+    mode === "cloud" ? "Synced to cloud" : "Saved on device";
+}
+function loadLocal(){ sessions = JSON.parse(localStorage.getItem(LS_SESSIONS) || "[]"); }
+function saveLocal(){ localStorage.setItem(LS_SESSIONS, JSON.stringify(sessions)); }
+
+function goLocal(reason){
+  usingCloud = false;
+  loadLocal();
+  setStatus("local");
+  if(reason) console.warn("Using local storage:", reason);
+  renderAll();
+}
+
+async function initStore(){
+  try {
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    const q = query(collection(db, "sessions"), orderBy("ts", "desc"));
+    onSnapshot(q,
+      (snap) => {
+        sessions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        usingCloud = true;
+        setStatus("cloud");
+        renderAll();
+      },
+      (err) => goLocal(err.message)   // rules not set / offline → fall back gracefully
+    );
+  } catch (e) {
+    goLocal(e.message);
+  }
+}
+
+async function addSession(s){
+  if(usingCloud){
+    try { await addDoc(collection(db, "sessions"), s); return; }
+    catch(e){ goLocal(e.message); }
+  }
+  s.id = "local_" + Date.now();
+  sessions.unshift(s); saveLocal(); renderAll();
+}
+async function removeSession(id){
+  if(usingCloud && !String(id).startsWith("local_")){
+    try { await deleteDoc(doc(db, "sessions", id)); return; }
+    catch(e){ goLocal(e.message); }
+  }
+  sessions = sessions.filter(s => s.id !== id); saveLocal(); renderAll();
+}
+
+/* ============== STATS ============== */
+function isoDate(ts){ const d=new Date(ts); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function startOfWeek(){ const d=new Date(); const off=(d.getDay()+6)%7; d.setHours(0,0,0,0); d.setDate(d.getDate()-off); return d.getTime(); }
+function computeStreak(){
+  const set = new Set(sessions.map(s => s.dateISO));
+  if(!set.size) return 0;
+  let d = new Date(); d.setHours(0,0,0,0);
+  if(!set.has(isoDate(d.getTime()))){ d.setDate(d.getDate()-1); if(!set.has(isoDate(d.getTime()))) return 0; }
+  let n=0; while(set.has(isoDate(d.getTime()))){ n++; d.setDate(d.getDate()-1); }
+  return n;
+}
+function thisWeekCount(){ const s=startOfWeek(); return sessions.filter(x => x.ts >= s).length; }
+
+/* ============== RENDER ============== */
+function renderStats(){
+  const items = [
+    [sessions.length, "Total workouts"],
+    [computeStreak(), "Day streak 🔥"],
+    [thisWeekCount(), "This week"],
+    [new Set(sessions.map(s=>s.dateISO)).size, "Active days"],
+  ];
+  document.getElementById("stats").innerHTML = items.map(([n,l]) =>
+    `<div class="stat"><div class="num">${n}</div><div class="lbl">${l}</div></div>`).join("");
+}
+
+function renderTabs(){
+  document.getElementById("tabs").innerHTML = DAYS.map((d,i) =>
+    `<button class="tab ${i===activeDay?"active":""}" data-i="${i}">${d.name}</button>`).join("");
+}
+
+function renderChecklist(){
   const d = DAYS[activeDay];
+  const pr = dayProgress(d.id);
+  const done = pr.filter(Boolean).length;
+  const pct = Math.round(done / d.rows.length * 100);
+  const tick = `<svg viewBox="0 0 24 24" fill="none" stroke="#062611" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`;
   document.getElementById("content").innerHTML = `
     <div class="day-card">
-      <h2>${d.name}</h2>
+      <div class="day-head"><h2>${d.name}</h2></div>
       <p class="focus">${d.focus}</p>
-      <table>
-        <thead>
-          <tr>
-            <th>Exercise</th>
-            <th class="sets">Sets × Reps</th>
-            <th class="wt-h">Weight</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${d.rows.map(r => `
-            <tr>
-              <td><div class="ex">${r[0]}</div><div class="muscle">${r[3]}</div></td>
-              <td class="sets">${r[1]}</td>
-              <td class="wt">${r[2]}</td>
-            </tr>`).join("")}
-        </tbody>
-      </table>
+      <div class="progress-wrap">
+        <div class="progress"><i style="width:${pct}%"></i></div>
+        <div class="progress-txt">${done}/${d.rows.length}</div>
+      </div>
+      ${d.rows.map((r,i) => `
+        <div class="ex-row ${pr[i]?"done":""}" data-ex="${i}">
+          <div class="check">${tick}</div>
+          <div class="ex-info">
+            <div class="ex-name">${r[0]}</div>
+            <div class="ex-meta"><b>${r[1]}</b> &nbsp;·&nbsp; ${r[2]}</div>
+          </div>
+        </div>`).join("")}
+      <button class="finish" id="finishBtn" ${done===0?"disabled":""}>
+        ${done===d.rows.length ? "✓ Finish workout" : `Log workout (${done}/${d.rows.length})`}
+      </button>
     </div>`;
 }
 
-render();
+function renderHistory(){
+  const el = document.getElementById("history");
+  if(!sessions.length){ el.innerHTML = `<div class="hist-empty">No workouts logged yet — finish a session to start your streak 💪</div>`; return; }
+  const fmt = ts => new Date(ts).toLocaleDateString(undefined,{weekday:"short", month:"short", day:"numeric"});
+  el.innerHTML = sessions.map(s => `
+    <div class="hist-item">
+      <div class="hist-badge">${(s.dayName||"?").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
+      <div class="hist-main">
+        <div class="hist-day">${s.dayName||"Workout"}</div>
+        <div class="hist-sub">${fmt(s.ts)} · ${s.done}/${s.total} exercises</div>
+      </div>
+      <button class="hist-del" data-del="${s.id}" title="Delete">✕</button>
+    </div>`).join("");
+}
+
+function renderAll(){ renderStats(); renderTabs(); renderChecklist(); renderHistory(); }
+
+/* ============== EVENTS ============== */
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 1900);
+}
+
+document.getElementById("tabs").addEventListener("click", e => {
+  const b = e.target.closest(".tab"); if(!b) return;
+  activeDay = +b.dataset.i; renderTabs(); renderChecklist();
+});
+
+document.getElementById("content").addEventListener("click", e => {
+  const row = e.target.closest(".ex-row");
+  if(row){
+    const d = DAYS[activeDay], i = +row.dataset.ex;
+    const pr = dayProgress(d.id);
+    pr[i] = !pr[i]; saveProgress(); renderChecklist();
+    return;
+  }
+  if(e.target.closest("#finishBtn")){
+    const d = DAYS[activeDay], pr = dayProgress(d.id);
+    const done = pr.filter(Boolean).length;
+    if(done === 0) return;
+    const ts = Date.now();
+    addSession({ dayId:d.id, dayName:d.name, dateISO:isoDate(ts), ts, done, total:d.rows.length });
+    progress[d.id] = d.rows.map(()=>false); saveProgress();
+    renderChecklist();
+    showToast("Workout logged! 🔥");
+  }
+});
+
+document.getElementById("history").addEventListener("click", e => {
+  const b = e.target.closest(".hist-del"); if(!b) return;
+  if(confirm("Delete this workout from history?")) removeSession(b.dataset.del);
+});
+
+/* ============== GO ============== */
+renderAll();      // instant paint (local progress) before cloud connects
+initStore();
 </script>
 </body>
 </html>
