@@ -69,7 +69,7 @@
   .error { color: #dc2626; font-size: 13px; min-height: 18px; margin-top: 12px; }
 
   /* ---------- App ---------- */
-  #app { display: none; max-width: 760px; margin: 0 auto; padding: 18px 16px 60px; }
+  #app { max-width: 760px; margin: 0 auto; padding: 18px 16px 60px; }
   .topbar {
     display: flex; align-items: center; justify-content: space-between;
     margin-bottom: 6px;
@@ -124,31 +124,10 @@
 </head>
 <body>
 
-<!-- ================= LOCK SCREEN ================= -->
-<div id="lock">
-  <div class="lock-card">
-    <div class="lock-emoji">🔒</div>
-    <h1>My Routine</h1>
-    <p>Enter your password to continue</p>
-    <form id="lockForm" autocomplete="off">
-      <div class="field">
-        <input type="password" id="pw" placeholder="Password" autocomplete="current-password" />
-      </div>
-      <label class="remember">
-        <input type="checkbox" id="remember" checked />
-        Remember me on this device
-      </label>
-      <button type="submit" class="primary">Unlock</button>
-      <div class="error" id="err"></div>
-    </form>
-  </div>
-</div>
-
 <!-- ================= APP ================= -->
 <div id="app">
   <div class="topbar">
     <h1>My PPL Routine</h1>
-    <button class="logout" id="logout">Log out</button>
   </div>
   <p class="sub">5-day Push / Pull / Legs · 80 kg lifter · no barbell/dumbbell rows</p>
 
@@ -168,63 +147,6 @@
 </div>
 
 <script>
-/* =========================================================
-   PASSWORD  — change it here.
-   Set the password you want below. It is stored as a simple
-   hash so it isn't sitting in plain text in the file.
-   To set a new password: open the browser console on this
-   page and run:  hashPw("yourNewPassword")
-   then paste the result into PASSWORD_HASH below.
-   ========================================================= */
-const PASSWORD_HASH = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"; // = "123"
-
-const STORAGE_KEY = "ppl_auth_ok";
-
-// Simple SHA-256 hash helper (also exposed globally to set a new password)
-async function hashPw(text) {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
-  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
-}
-window.hashPw = async (t) => { const h = await hashPw(t); console.log(h); return h; };
-
-/* ---------- Auth flow ---------- */
-const lock = document.getElementById("lock");
-const app  = document.getElementById("app");
-
-function showApp() {
-  lock.style.display = "none";
-  app.style.display = "block";
-  render();
-}
-
-// "Remember me" — if previously unlocked on this device, skip the gate
-if (localStorage.getItem(STORAGE_KEY) === "1" || sessionStorage.getItem(STORAGE_KEY) === "1") {
-  showApp();
-}
-
-document.getElementById("lockForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const pw  = document.getElementById("pw").value;
-  const err = document.getElementById("err");
-  const remember = document.getElementById("remember").checked;
-  const entered = await hashPw(pw);
-  if (entered === PASSWORD_HASH) {
-    err.textContent = "";
-    // remember across sessions, or just this tab
-    (remember ? localStorage : sessionStorage).setItem(STORAGE_KEY, "1");
-    showApp();
-  } else {
-    err.textContent = "Wrong password — try again.";
-    document.getElementById("pw").select();
-  }
-});
-
-document.getElementById("logout").addEventListener("click", () => {
-  localStorage.removeItem(STORAGE_KEY);
-  sessionStorage.removeItem(STORAGE_KEY);
-  location.reload();
-});
-
 /* =========================================================
    ROUTINE DATA
    ========================================================= */
@@ -321,6 +243,8 @@ function render() {
       </table>
     </div>`;
 }
+
+render();
 </script>
 </body>
 </html>
